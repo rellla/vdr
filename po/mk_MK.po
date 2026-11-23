@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VDR 2.8.4\n"
 "Report-Msgid-Bugs-To: <vdr-bugs@tvdr.de>\n"
-"POT-Creation-Date: 2026-09-25 10:59+0200\n"
+"POT-Creation-Date: 2026-11-22 15:25+0100\n"
 "PO-Revision-Date: 2018-03-31 21:47+0100\n"
 "Last-Translator: Dimitar Petrovski <dimeptr@gmail.com>\n"
 "Language-Team: Macedonian <kde-i18n-doc@kde.org>\n"
@@ -1510,6 +1510,9 @@ msgstr "Рестартирање?"
 #. TRANSLATORS: note the leading and trailing blanks!
 msgid " Stop recording "
 msgstr " Запри снимање "
+
+msgid "Commands"
+msgstr "Наредби"
 
 #. TRANSLATORS: note the leading blank!
 msgid " Deleted recordings"

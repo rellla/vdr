@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VDR 2.8.4\n"
 "Report-Msgid-Bugs-To: <vdr-bugs@tvdr.de>\n"
-"POT-Creation-Date: 2026-09-25 10:59+0200\n"
+"POT-Creation-Date: 2026-11-22 15:25+0100\n"
 "PO-Revision-Date: 2026-07-22 11:43+0100\n"
 "Last-Translator: Carel Willemse <carel@nekanali.nl>\n"
 "Language-Team: Dutch <vdr@linuxtv.org>\n"
@@ -1514,6 +1514,9 @@ msgstr "Werkelijk opnieuw starten?"
 #. TRANSLATORS: note the leading and trailing blanks!
 msgid " Stop recording "
 msgstr " Stop opnemen "
+
+msgid "Commands"
+msgstr "Commando's"
 
 #. TRANSLATORS: note the leading blank!
 msgid " Deleted recordings"

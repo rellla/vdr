@@ -207,7 +207,7 @@ public:
   virtual ~cNestedItem() override;
   virtual int Compare(const cListObject &ListObject) const override;
   const char *Text(void) const { return text; }
-  cList<cNestedItem> *SubItems(void) { return subItems; }
+  cList<cNestedItem> *SubItems(void) const { return subItems; }
   void AddSubItem(cNestedItem *Item);
   void SetText(const char *Text);
   void SetSubItems(bool On);
@@ -232,6 +232,7 @@ public:
   bool Acceptable(in_addr_t Address);
   };
 
+extern cNestedItemList MainMenu;
 extern cNestedItemList Folders;
 extern cNestedItemList Commands;
 extern cNestedItemList RecordingCommands;

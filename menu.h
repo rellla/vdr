@@ -109,6 +109,8 @@ public:
 
 class cMenuMain : public cOsdMenu {
 private:
+  cVector<const cNestedItem *> items;
+  const cNestedItem *currentSubMenu;
   bool replaying;
   cOsdItem *deletedRecordingsItem;
   cOsdItem *stopReplayItem;

@@ -4726,6 +4726,22 @@ eOSState cMenuSetup::ProcessKey(eKeys Key)
   return state;
 }
 
+// --- cMenuSubItem ----------------------------------------------------------
+
+class cMenuSubItem : public cOsdItem {
+private:
+  const cNestedItem *item;
+public:
+  cMenuSubItem(const char *Name, const cNestedItem *Item);
+  const cNestedItem *Item(void) const { return item; }
+  };
+
+cMenuSubItem::cMenuSubItem(const char *Name, const cNestedItem *Item)
+:cOsdItem(Name, osSubMenu)
+{
+  item = Item;
+}
+
 // --- cMenuPluginItem -------------------------------------------------------
 
 class cMenuPluginItem : public cOsdItem {
@@ -4753,6 +4769,7 @@ cMenuMain::cMenuMain(eOSState State, bool OpenSubMenus)
 :cOsdMenu("")
 {
   SetMenuCategory(mcMain);
+  currentSubMenu = NULL;
   replaying = false;
   deletedRecordingsItem = NULL;
   stopReplayItem = NULL;
@@ -4783,36 +4800,85 @@ cOsdObject *cMenuMain::PluginOsdObject(void)
 
 void cMenuMain::Set(void)
 {
+  deletedRecordingsItem = NULL;
+  stopReplayItem = NULL;
+  cancelEditingItem = NULL;
+  stopRecordingItem = NULL;
   Clear();
   SetTitle("VDR");
   SetHasHotkeys();
 
-  // Basic menu items:
+  if (MainMenu.Count() == 0) {
+     // Default menu:
+     MainMenu.Add(new cNestedItem("=Schedule"));
+     MainMenu.Add(new cNestedItem("=Channels"));
+     MainMenu.Add(new cNestedItem("=Timers"));
+     MainMenu.Add(new cNestedItem("=Recordings"));
+     MainMenu.Add(new cNestedItem("=Plugins"));
+     MainMenu.Add(new cNestedItem("=Setup"));
+     MainMenu.Add(new cNestedItem("=Commands"));
+     MainMenu.Save();
+     }
 
-  Add(new cOsdItem(hk(tr("Schedule")),   osSchedule));
-  Add(new cOsdItem(hk(tr("Channels")),   osChannels));
-  Add(new cOsdItem(hk(tr("Timers")),     osTimers));
-  Add(new cOsdItem(hk(tr("Recordings")), osRecordings));
-
-  // Plugins:
-
-  for (int i = 0; ; i++) {
-      cPlugin *p = cPluginManager::GetPlugin(i);
-      if (p) {
-         const char *item = p->MainMenuEntry();
-         if (item)
-            Add(new cMenuPluginItem(hk(item), i));
+  if (items.Size())
+     Add(new cOsdItem(items[items.Size() - 1]->Text(), osUnknown, false));
+  const cList<cNestedItem> *Items = items.Size() ? items[items.Size() - 1]->SubItems() : &MainMenu;
+  for (const cNestedItem *Item = Items->First(); Item; Item = Items->Next(Item)) {
+      if (const char *s = Item->Text()) {
+         if (*s == '=') {
+            s++;
+            if      (!strcmp(s, "Schedule"))   Add(new cOsdItem(hk(tr("Schedule")),   osSchedule));
+            else if (!strcmp(s, "Channels"))   Add(new cOsdItem(hk(tr("Channels")),   osChannels));
+            else if (!strcmp(s, "Timers"))     Add(new cOsdItem(hk(tr("Timers")),     osTimers));
+            else if (!strcmp(s, "Recordings")) Add(new cOsdItem(hk(tr("Recordings")), osRecordings));
+            else if (!strcmp(s, "Setup"))      Add(new cOsdItem(hk(tr("Setup")),      osSetup));
+            else if (!strcmp(s, "Plugins")) {
+               for (int i = 0; ; i++) {
+                   if (cPlugin *p = cPluginManager::GetPlugin(i)) {
+                      if (const char *entry = p->MainMenuEntry())
+                         Add(new cMenuPluginItem(hk(entry), i));
+                      }
+                   else
+                      break;
+                   }
+               }
+            else if (!strcmp(s, "Commands")) {
+               if (Commands.Count())
+                  Add(new cOsdItem(hk(tr("Commands")), osCommands));
+               }
+            else
+               esyslog("ERROR: unknown menu item '=%s' in menu.conf", s);
+            }
+         else if (*s == '@') {
+            bool Found = false;
+            const char *Title = strchr(s, ':');
+            cString Name(s + 1, Title);
+            if (Title)
+               Title++;
+            for (int i = 0; ; i++) {
+                if (cPlugin *p = cPluginManager::GetPlugin(i)) {
+                   if (!strcmp(Name, p->Name())) {
+                      Found = true;
+                      if (const char *entry = p->MainMenuEntry())
+                         Add(new cMenuPluginItem(hk(Title ? Title : entry), i));
+                      else
+                         esyslog("ERROR: plugin '@%s' has no main menu entry in menu.conf", *Name);
+                      break;
+                      }
+                   }
+                else
+                   break;
+                }
+            if (!Found)
+               esyslog("ERROR: plugin '@%s' not found in menu.conf", *Name);
+            }
+         else if (Item->SubItems())
+            Add(new cMenuSubItem(hk(s), Item), Item == currentSubMenu);
+         else
+            Add(new cOsdItem(s, osUnknown, false));
          }
-      else
-         break;
       }
-
-  // More basic menu items:
-
-  Add(new cOsdItem(hk(tr("Setup")),      osSetup));
-  if (Commands.Count())
-     Add(new cOsdItem(hk(tr("Button$Commands")),  osCommands));
-
+  currentSubMenu = NULL;
   Update(true);
 
   Display();
@@ -4821,6 +4887,9 @@ void cMenuMain::Set(void)
 bool cMenuMain::Update(bool Force)
 {
   bool result = false;
+
+  if (items.Size())
+     return result;
 
   // Deleted recordings:
   {
@@ -4873,7 +4942,7 @@ bool cMenuMain::Update(bool Force)
      }
 
   // Record control:
-  if (cRecordControls::StateChanged(recordControlsState)) {
+  if (Force || cRecordControls::StateChanged(recordControlsState)) {
      while (stopRecordingItem) {
            cOsdItem *it = Next(stopRecordingItem);
            Del(stopRecordingItem->Index());
@@ -4939,6 +5008,19 @@ eOSState cMenuMain::ProcessKey(eKeys Key)
                             }
                          state = osEnd;
                        }
+                       break;
+    case osSubMenu:    if (cMenuSubItem *item = (cMenuSubItem *)Get(Current())) {
+                          items.Append(item->Item());
+                          Set();
+                          state = osContinue;
+                          }
+                       break;
+    case osBack:       if (items.Size()) {
+                          currentSubMenu = items[items.Size() - 1];
+                          items.Remove(items.Size() - 1);
+                          Set();
+                          state = osContinue;
+                          }
                        break;
     default: switch (Key) {
                case kRecord:

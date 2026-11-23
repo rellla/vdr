@@ -270,8 +270,9 @@ bool cNestedItemList::Save(void)
   return result;
 }
 
-// --- Folders and Commands --------------------------------------------------
+// --- Menu, Folders and Commands --------------------------------------------
 
+cNestedItemList MainMenu;
 cNestedItemList Folders;
 cNestedItemList Commands;
 cNestedItemList RecordingCommands;

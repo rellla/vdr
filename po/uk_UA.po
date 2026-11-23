@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: VDR 2.8.4\n"
 "Report-Msgid-Bugs-To: <vdr-bugs@tvdr.de>\n"
-"POT-Creation-Date: 2026-09-25 10:59+0200\n"
+"POT-Creation-Date: 2026-11-22 15:25+0100\n"
 "PO-Revision-Date: 2018-03-18 20:00+0100\n"
 "Last-Translator: Yarema aka Knedlyk <yupadmin@gmail.com>\n"
 "Language-Team: Ukrainian <vdr@linuxtv.org>\n"
@@ -1509,6 +1509,9 @@ msgstr "Дійсно перезапустити?"
 #. TRANSLATORS: note the leading and trailing blanks!
 msgid " Stop recording "
 msgstr " Зупинити запис "
+
+msgid "Commands"
+msgstr "Команди"
 
 #. TRANSLATORS: note the leading blank!
 msgid " Deleted recordings"

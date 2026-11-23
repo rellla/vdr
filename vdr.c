@@ -825,6 +825,7 @@ int main(int argc, char *argv[])
 
   // Configuration data:
 
+  MainMenu.Load(AddDirectory(ConfigDirectory, "menu.conf"));
   Setup.Load(AddDirectory(ConfigDirectory, "setup.conf"));
   Sources.Load(AddDirectory(ConfigDirectory, "sources.conf"), true, true);
   Diseqcs.Load(AddDirectory(ConfigDirectory, "diseqc.conf"), true, Setup.DiSEqC);

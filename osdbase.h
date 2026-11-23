@@ -32,6 +32,7 @@ enum eOSState { osUnknown,
                 osStopRecord,
                 osStopReplay,
                 osCancelEdit,
+                osSubMenu,
                 osBack,
                 osEnd,
                 os_User, // the following values can be used locally

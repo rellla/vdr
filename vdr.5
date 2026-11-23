@@ -616,6 +616,84 @@ Note that the color keys will only execute their macro function
 in "normal viewing" mode (i.e. when no other menu or player is active). The
 \fIUser1\fR...\fIUser9\fR keys will always execute their macro function.
 There may be up to 15 keys in such a key sequence.
+
+.SS MENU
+The file \fImenu.conf\fR can be used to override the default main menu.
+Each line contains one menu item definition. Leading whitespace
+and everything after and including a '#' is ignored.
+
+The default menu items can be referenced by these keywords:
+.PP
+.EX
+=Schedule
+=Channels
+=Timers
+=Recordings
+=Plugins
+=Setup
+=Commands
+.EE
+.PP
+Note that these keywords need to be given exactly as listed here (with the leading '=').
+The actual text shown in the menu will be translated to your selected language (if any).
+
+A line ending with '{' defines a sub menu (i.e. a menu that contains other items),
+and a line consisting of only '}' ends the definition of a sub menu:
+.PP
+.EX
+My special menu {
+  =Setup
+  =Commands
+  }
+.EE
+.PP
+
+You can also create menu items that call the main menu action of a plugin.
+This is done by writing the name of the plugin with a leading '@', as in
+.PP
+.EX
+@myplugin
+.EE
+.PP
+This will create a menu item that shows the string returned by the plugin's
+MainMenuEntry() function and, when selected, calls the plugin's MainMenuAction()
+function.
+If you want the menu item to show a different text than the one given by the
+plugin's MainMenuEntry() function, you can override this by adding your own
+text, separated by a ':', as in
+.PP
+.EX
+@myplugin:My item text
+.EE
+.PP
+Note that there may be no blanks surrounding the ':'.
+
+Here's what a fancy main menu might look like:
+.PP
+.EX
+@tvguide:Programm
+=Recordings
+@web:HbbTV
+@drmdevice:Mediaplayer
+@hyperion:Ambilight
+@actionmenu
+Plugins {
+  =Plugins
+  }
+VDR {
+  =Timers
+  =Schedule
+  =Channels
+  =Recordings
+  =Commands
+  }
+=Setup
+.EE
+.PP
+
+If no \fImenu.conf\fR is present, it will be automatically generated with the default
+items when the main menu is opened for the first time.
+
 .SS FOLDERS
 The file \fIfolders.conf\fR contains the definitions of folders that can be used
 in the "Edit timer" menu. Each line contains one folder definition. Leading whitespace
